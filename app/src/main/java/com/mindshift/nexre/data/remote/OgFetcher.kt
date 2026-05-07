@@ -18,14 +18,29 @@ data class OgData(
 class OgFetcher @Inject constructor() {
 
     suspend fun fetch(url: String): OgData = withContext(Dispatchers.IO) {
-        val doc = Jsoup.connect(url)
+        val resolvedUrl = resolveUrl(url)
+
+        // PDF files cannot be parsed as HTML — save with minimal metadata
+        if (isPdfUrl(resolvedUrl)) {
+            val title = resolvedUrl.substringAfterLast('/').removeSuffix(".pdf").ifBlank { "PDF Document" }
+            return@withContext OgData(
+                title = title,
+                description = "",
+                imageUrl = "",
+                sourcePlatform = detectPlatform(resolvedUrl),
+                bodyText = "",
+            )
+        }
+
+        val doc = Jsoup.connect(resolvedUrl)
             .userAgent("Mozilla/5.0 (compatible; NexRe/1.0)")
             .timeout(10_000)
+            .ignoreContentType(true)
             .get()
 
         val title = doc.select("meta[property=og:title]").attr("content")
             .ifBlank { doc.title() }
-            .ifBlank { url }
+            .ifBlank { resolvedUrl }
 
         val description = doc.select("meta[property=og:description]").attr("content")
             .ifBlank { doc.select("meta[name=description]").attr("content") }
@@ -45,6 +60,22 @@ class OgFetcher @Inject constructor() {
             sourcePlatform = detectPlatform(url),
             bodyText = bodyText,
         )
+    }
+
+    // arXiv: /pdf/XXXX → /abs/XXXX so we get the HTML abstract page with OG tags
+    private fun resolveUrl(url: String): String {
+        val lower = url.lowercase()
+        if ("arxiv.org/pdf/" in lower) {
+            return url
+                .replace("arxiv.org/pdf/", "arxiv.org/abs/", ignoreCase = true)
+                .removeSuffix(".pdf")
+        }
+        return url
+    }
+
+    private fun isPdfUrl(url: String): Boolean {
+        val lower = url.lowercase()
+        return lower.endsWith(".pdf") || lower.contains("/pdf?") || lower.contains("type=pdf")
     }
 
     fun detectPlatform(url: String): String {
