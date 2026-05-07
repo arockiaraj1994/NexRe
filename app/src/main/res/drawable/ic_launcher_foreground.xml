@@ -4,16 +4,33 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- N mark: two vertical bars connected by diagonal -->
+
+    <!-- Left vertical bar -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M34,72 L34,36 L54,60 L54,36"
         android:strokeColor="#FFFFFF"
         android:strokeWidth="5"
         android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
-    <!-- dot accent (circle as path) -->
+        android:fillColor="#00000000"
+        android:pathData="M32,72 L32,36"/>
+
+    <!-- Right vertical bar -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M68,36 L68,72"/>
+
+    <!-- Diagonal -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M32,36 L68,72"/>
+
+    <!-- Accent dot — upper right -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M70,34 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0"/>
+        android:pathData="M78,28 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"/>
 </vector>
