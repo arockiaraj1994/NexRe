@@ -21,6 +21,8 @@ local.properties
 *.jks
 *.keystore
 *.p12
+keystore.properties
+app/keystore.properties
 
 # OS
 .DS_Store
