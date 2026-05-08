@@ -27,9 +27,13 @@ class ShareViewModel @Inject constructor(
     private val _state = MutableStateFlow<ShareUiState>(ShareUiState.Loading)
     val state = _state.asStateFlow()
 
+    private var pendingLink: Link? = null
+
     fun startSummarize(url: String) = viewModelScope.launch {
         _state.value = ShareUiState.Loading
-        _state.value = when (val result = summarizeLinkUseCase(url)) {
+        val result = summarizeLinkUseCase(url)
+        pendingLink = (result as? SummarizeLinkUseCase.Result.Success)?.link
+        _state.value = when (result) {
             is SummarizeLinkUseCase.Result.Success -> ShareUiState.Summary(result.link)
             is SummarizeLinkUseCase.Result.NoApiKey -> ShareUiState.NoApiKey
             is SummarizeLinkUseCase.Result.NoInternet -> ShareUiState.NoInternet
@@ -39,7 +43,9 @@ class ShareViewModel @Inject constructor(
 
     fun startSummarizeText(text: String) = viewModelScope.launch {
         _state.value = ShareUiState.Loading
-        _state.value = when (val result = summarizeLinkUseCase.invokeText(text)) {
+        val result = summarizeLinkUseCase.invokeText(text)
+        pendingLink = (result as? SummarizeLinkUseCase.Result.Success)?.link
+        _state.value = when (result) {
             is SummarizeLinkUseCase.Result.Success -> ShareUiState.Summary(result.link)
             is SummarizeLinkUseCase.Result.NoApiKey -> ShareUiState.NoApiKey
             is SummarizeLinkUseCase.Result.NoInternet -> ShareUiState.NoInternet
@@ -47,5 +53,8 @@ class ShareViewModel @Inject constructor(
         }
     }
 
-    fun confirmSave() { _state.value = ShareUiState.Saved }
+    fun confirmSave() = viewModelScope.launch {
+        pendingLink?.let { summarizeLinkUseCase.savePendingLink(it) }
+        _state.value = ShareUiState.Saved
+    }
 }

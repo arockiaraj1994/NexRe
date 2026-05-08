@@ -136,8 +136,12 @@ class SummarizeLinkUseCase @Inject constructor(
             readDurationSec = 0,
             readCount = 0,
         )
-        linkRepository.saveLink(link, if (summarySource == SummarySource.GEMINI) "GEMINI" else "KEYWORD")
         return Result.Success(link)
+    }
+
+    suspend fun savePendingLink(link: Link) {
+        val source = if (link.summarySource == SummarySource.GEMINI) "GEMINI" else "KEYWORD"
+        linkRepository.saveLink(link, source)
     }
 
     private fun jsonOnlyInstruction() = SystemInstruction(
