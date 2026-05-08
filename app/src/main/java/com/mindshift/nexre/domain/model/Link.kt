@@ -24,7 +24,7 @@ enum class LinkStatus { UNREAD, READ, ARCHIVED }
 enum class SummarySource { NONE, OG_META, GEMINI }
 
 enum class SourcePlatform {
-    GITHUB, LINKEDIN, TWITTER, MEDIUM, DEV, STACKOVERFLOW, RESEARCH, WEB, TEXT;
+    GITHUB, LINKEDIN, TWITTER, MEDIUM, DEV, STACKOVERFLOW, RESEARCH, WEB, TEXT, IMAGE;
 
     val displayName: String get() = when (this) {
         GITHUB -> "GitHub"
@@ -36,5 +36,6 @@ enum class SourcePlatform {
         RESEARCH -> "arXiv"
         WEB -> "Web"
         TEXT -> "Note"
+        IMAGE -> "Image"
     }
 }

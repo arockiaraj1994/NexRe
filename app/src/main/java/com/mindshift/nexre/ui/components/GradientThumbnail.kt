@@ -13,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
 import com.mindshift.nexre.domain.model.Link
 import com.mindshift.nexre.domain.model.SourcePlatform
 
@@ -31,6 +33,24 @@ private val palettes = listOf(
 
 @Composable
 fun GradientThumbnail(link: Link, size: Dp = 80.dp, cornerRadius: Dp = 12.dp) {
+    if (link.thumbnailUrl.isNotBlank()) {
+        SubcomposeAsyncImage(
+            model = link.thumbnailUrl,
+            contentDescription = link.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(size)
+                .clip(RoundedCornerShape(cornerRadius)),
+            loading = { GradientThumbnailPlaceholder(link, size, cornerRadius) },
+            error = { GradientThumbnailPlaceholder(link, size, cornerRadius) },
+        )
+    } else {
+        GradientThumbnailPlaceholder(link, size, cornerRadius)
+    }
+}
+
+@Composable
+private fun GradientThumbnailPlaceholder(link: Link, size: Dp, cornerRadius: Dp) {
     val hash = (link.url + link.title).fold(0) { acc, c -> acc + c.code }
     val (start, end) = palettes[hash % palettes.size]
 

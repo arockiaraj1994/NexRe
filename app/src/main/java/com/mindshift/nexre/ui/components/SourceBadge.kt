@@ -30,6 +30,7 @@ private val styles = mapOf(
     SourcePlatform.RESEARCH to BadgeStyle(Color(0xFFB31B1B), Color.White, "arX"),
     SourcePlatform.WEB to BadgeStyle(Color(0xFF374151), Color.White, "Web"),
     SourcePlatform.TEXT to BadgeStyle(Color(0xFF5C6BC0), Color.White, "Txt"),
+    SourcePlatform.IMAGE to BadgeStyle(Color(0xFF1E88E5), Color.White, "IMG"),
 )
 
 @Composable

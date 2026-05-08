@@ -12,21 +12,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.SubcomposeAsyncImage
 import com.mindshift.nexre.ui.components.TagChip
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -80,6 +88,42 @@ fun SummarizeBottomSheetRoot(
                             s.link.tags.forEach { tag -> TagChip(label = tag) }
                         }
                     }
+                    Spacer(Modifier.height(20.dp))
+                    Button(onClick = { viewModel.confirmSave() }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Save")
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                        Text("Dismiss")
+                    }
+                }
+                is ShareUiState.ImagePreview -> {
+                    SubcomposeAsyncImage(
+                        model = s.sourceUri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        loading = {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().height(200.dp)
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentAlignment = Alignment.Center,
+                            ) { CircularProgressIndicator(modifier = Modifier.size(32.dp)) }
+                        },
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    var titleText by remember(s.title) { mutableStateOf(s.title) }
+                    OutlinedTextField(
+                        value = titleText,
+                        onValueChange = { titleText = it; viewModel.updateImageTitle(it) },
+                        label = { Text("Title") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
                     Spacer(Modifier.height(20.dp))
                     Button(onClick = { viewModel.confirmSave() }, modifier = Modifier.fillMaxWidth()) {
                         Text("Save")
