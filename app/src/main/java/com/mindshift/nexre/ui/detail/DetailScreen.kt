@@ -1,6 +1,7 @@
 package com.mindshift.nexre.ui.detail
 
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -51,16 +52,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.SubcomposeAsyncImage
 import com.mindshift.nexre.domain.model.Link
 import com.mindshift.nexre.domain.model.SourcePlatform
 import com.mindshift.nexre.domain.model.SummarySource
 import com.mindshift.nexre.ui.components.GradientThumbnail
 import com.mindshift.nexre.ui.components.SourceBadge
 import com.mindshift.nexre.ui.components.TagChip
+import com.mindshift.nexre.ui.components.ZoomableImageViewer
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -78,6 +83,7 @@ fun DetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showImageViewer by remember { mutableStateOf(false) }
     var noteText by remember { mutableStateOf("") }
 
     LaunchedEffect(link?.personalNote) {
@@ -122,7 +128,19 @@ fun DetailScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                GradientThumbnail(link = l, size = 200.dp, cornerRadius = 16.dp)
+                if (l.sourcePlatform == SourcePlatform.IMAGE && l.thumbnailUrl.isNotBlank()) {
+                    SubcomposeAsyncImage(
+                        model = l.thumbnailUrl,
+                        contentDescription = l.title,
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { showImageViewer = true },
+                    )
+                } else {
+                    GradientThumbnail(link = l, size = 200.dp, cornerRadius = 16.dp)
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SourceBadge(source = l.sourcePlatform, size = 32.dp)
                     Spacer(Modifier.width(8.dp))
@@ -242,6 +260,12 @@ fun DetailScreen(
             },
             dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } },
         )
+    }
+
+    if (showImageViewer) {
+        link?.thumbnailUrl?.let { url ->
+            ZoomableImageViewer(imageUrl = url, onDismiss = { showImageViewer = false })
+        }
     }
 }
 
