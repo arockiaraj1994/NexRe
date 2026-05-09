@@ -18,6 +18,7 @@ class SaveTextUseCase @Inject constructor(
         val trimmed = text.trim()
         val title = trimmed.lines().firstOrNull { it.isNotBlank() }?.take(120) ?: "Note"
         val tags = keywordTagger.tag(title, trimmed)
+        val wordCount = trimmed.split("\\s+".toRegex()).count { it.isNotBlank() }
         val link = Link(
             id = UUID.randomUUID().toString(),
             url = "",
@@ -35,6 +36,7 @@ class SaveTextUseCase @Inject constructor(
             openedAt = 0L,
             readDurationSec = 0,
             readCount = 0,
+            wordCount = wordCount,
         )
         linkRepository.saveLink(link, "KEYWORD")
         return link

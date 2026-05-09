@@ -21,4 +21,5 @@ data class LinkEntity(
     @ColumnInfo(name = "opened_at") val openedAt: Long,
     @ColumnInfo(name = "read_duration_sec") val readDurationSec: Int,
     @ColumnInfo(name = "read_count") val readCount: Int,
+    @ColumnInfo(name = "word_count") val wordCount: Int = 0,
 )

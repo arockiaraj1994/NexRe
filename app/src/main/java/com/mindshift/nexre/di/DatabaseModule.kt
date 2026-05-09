@@ -19,7 +19,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): NexReDatabase =
-        Room.databaseBuilder(context, NexReDatabase::class.java, "nexre.db").build()
+        Room.databaseBuilder(context, NexReDatabase::class.java, "nexre.db")
+            .addMigrations(NexReDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideLinkDao(db: NexReDatabase): LinkDao = db.linkDao()

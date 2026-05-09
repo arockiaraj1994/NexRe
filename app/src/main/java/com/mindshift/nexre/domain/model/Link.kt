@@ -17,7 +17,11 @@ data class Link(
     val openedAt: Long,
     val readDurationSec: Int,
     val readCount: Int,
-)
+    val wordCount: Int = 0,
+) {
+    val estimatedReadMinutes: Int
+        get() = if (wordCount < 50) 0 else (wordCount / 200).coerceAtLeast(1)
+}
 
 enum class LinkStatus { UNREAD, READ, ARCHIVED }
 

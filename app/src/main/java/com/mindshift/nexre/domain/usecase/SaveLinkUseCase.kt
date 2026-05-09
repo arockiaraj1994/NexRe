@@ -17,8 +17,11 @@ class SaveLinkUseCase @Inject constructor(
     private val linkRepository: LinkRepository,
 ) {
     suspend operator fun invoke(url: String): Link {
+        val existing = linkRepository.getLinkByUrl(url)
+        if (existing != null) return existing
         val og = ogFetcher.fetch(url)
         val tags = keywordTagger.tag(og.title, og.description)
+        val wordCount = og.bodyText.split("\\s+".toRegex()).count { it.isNotBlank() }
         val link = Link(
             id = UUID.randomUUID().toString(),
             url = url,
@@ -36,6 +39,7 @@ class SaveLinkUseCase @Inject constructor(
             openedAt = 0L,
             readDurationSec = 0,
             readCount = 0,
+            wordCount = wordCount,
         )
         linkRepository.saveLink(link, "KEYWORD")
         return link

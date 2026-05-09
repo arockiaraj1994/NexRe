@@ -28,9 +28,12 @@ class LinkRepositoryImpl @Inject constructor(
     override fun getFavouriteLinks() = linkDao.getFavouriteLinks().map { it.map(::toLink) }
     override fun getAllLinks() = linkDao.getAllLinks().map { it.map(::toLink) }
     override fun getLinksSortedByOpened() = linkDao.getLinksSortedByOpened().map { it.map(::toLink) }
+    override fun getAllLinksOldestFirst() = linkDao.getAllLinksOldestFirst().map { it.map(::toLink) }
+    override fun getAllLinksMostOpened() = linkDao.getAllLinksMostOpened().map { it.map(::toLink) }
     override fun searchLinks(query: String) = linkDao.searchLinks(query).map { it.map(::toLink) }
     override fun getLinkById(id: String) = linkDao.getLinkById(id).map { it?.let(::toLink) }
     override fun getLinksByTag(tagName: String) = linkDao.getLinksByTag(tagName).map { it.map(::toLink) }
+    override suspend fun getLinkByUrl(url: String): Link? = linkDao.getLinkByUrl(url)?.let(::toLink)
 
     override suspend fun saveLink(link: Link, tagSource: String) {
         linkDao.upsertLink(toEntity(link))
@@ -87,6 +90,7 @@ class LinkRepositoryImpl @Inject constructor(
         openedAt = lwt.link.openedAt,
         readDurationSec = lwt.link.readDurationSec,
         readCount = lwt.link.readCount,
+        wordCount = lwt.link.wordCount,
     )
 
     private fun toEntity(link: Link) = LinkEntity(
@@ -105,5 +109,6 @@ class LinkRepositoryImpl @Inject constructor(
         openedAt = link.openedAt,
         readDurationSec = link.readDurationSec,
         readCount = link.readCount,
+        wordCount = link.wordCount,
     )
 }

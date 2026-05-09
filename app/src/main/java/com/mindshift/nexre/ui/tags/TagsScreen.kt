@@ -14,7 +14,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DriveFileRenameOutline
 import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.outlined.MergeType
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
@@ -23,6 +26,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -48,6 +52,8 @@ fun TagsScreen(
     viewModel: TagsViewModel = hiltViewModel(),
 ) {
     val tags by viewModel.tags.collectAsState()
+    val renameDialogTag by viewModel.renameDialogTag.collectAsState()
+    val mergeSourceTag by viewModel.mergeSourceTag.collectAsState()
     var selectedTag by remember { mutableStateOf<Tag?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -100,10 +106,31 @@ fun TagsScreen(
 
     selectedTag?.let { tag ->
         ModalBottomSheet(onDismissRequest = { selectedTag = null }, sheetState = sheetState) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(tag.name, style = MaterialTheme.typography.titleMedium)
-                TextButton(onClick = { showDeleteDialog = true; selectedTag = null }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Delete tag", color = MaterialTheme.colorScheme.error)
+            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
+                Text(tag.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                TextButton(
+                    onClick = { viewModel.openRenameDialog(tag); selectedTag = null },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Outlined.DriveFileRenameOutline, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Rename")
+                }
+                TextButton(
+                    onClick = { viewModel.openMergePicker(tag); selectedTag = null },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Outlined.MergeType, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Merge into…")
+                }
+                TextButton(
+                    onClick = { showDeleteDialog = true; selectedTag = null },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -122,4 +149,52 @@ fun TagsScreen(
             dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } },
         )
     }
+
+    renameDialogTag?.let { tag -> RenameTagDialog(tag, onConfirm = viewModel::confirmRename, onDismiss = viewModel::dismissRenameDialog) }
+    mergeSourceTag?.let { tag -> MergeTagPicker(tag, allTags = tags, onConfirm = viewModel::confirmMerge, onDismiss = viewModel::dismissMergePicker) }
+}
+
+@Composable
+private fun RenameTagDialog(tag: Tag, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by remember(tag.id) { mutableStateOf(tag.name) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Rename tag") },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                singleLine = true,
+                label = { Text("Tag name") },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank() && name != tag.name) {
+                Text("Rename")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+@Composable
+private fun MergeTagPicker(tag: Tag, allTags: List<Tag>, onConfirm: (Tag) -> Unit, onDismiss: () -> Unit) {
+    val targets = allTags.filter { it.id != tag.id }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Merge \"${tag.name}\" into…") },
+        text = {
+            LazyColumn {
+                items(targets, key = { it.id }) { target ->
+                    TextButton(onClick = { onConfirm(target) }, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Outlined.Label, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(target.name, modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }

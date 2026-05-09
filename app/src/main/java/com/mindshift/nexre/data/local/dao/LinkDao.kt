@@ -43,6 +43,14 @@ interface LinkDao {
     fun getLinksSortedByOpened(): Flow<List<LinkWithTags>>
 
     @Transaction
+    @Query("SELECT * FROM links ORDER BY saved_at ASC")
+    fun getAllLinksOldestFirst(): Flow<List<LinkWithTags>>
+
+    @Transaction
+    @Query("SELECT * FROM links ORDER BY read_count DESC")
+    fun getAllLinksMostOpened(): Flow<List<LinkWithTags>>
+
+    @Transaction
     @Query("""
         SELECT DISTINCT l.* FROM links l
         LEFT JOIN link_tags lt ON l.id = lt.link_id
@@ -59,6 +67,10 @@ interface LinkDao {
     @Transaction
     @Query("SELECT * FROM links WHERE id = :id")
     fun getLinkById(id: String): Flow<LinkWithTags?>
+
+    @Transaction
+    @Query("SELECT * FROM links WHERE url = :url LIMIT 1")
+    suspend fun getLinkByUrl(url: String): LinkWithTags?
 
     @Query("UPDATE links SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: String, status: String)

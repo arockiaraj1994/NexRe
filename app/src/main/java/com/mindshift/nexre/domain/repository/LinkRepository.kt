@@ -10,8 +10,11 @@ interface LinkRepository {
     fun getFavouriteLinks(): Flow<List<Link>>
     fun getAllLinks(): Flow<List<Link>>
     fun getLinksSortedByOpened(): Flow<List<Link>>
+    fun getAllLinksOldestFirst(): Flow<List<Link>>
+    fun getAllLinksMostOpened(): Flow<List<Link>>
     fun searchLinks(query: String): Flow<List<Link>>
     fun getLinkById(id: String): Flow<Link?>
+    suspend fun getLinkByUrl(url: String): Link?
     fun getLinksByTag(tagName: String): Flow<List<Link>>
     suspend fun saveLink(link: Link, tagSource: String = "KEYWORD")
     suspend fun updateStatus(id: String, status: LinkStatus)
