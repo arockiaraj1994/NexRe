@@ -20,7 +20,11 @@ data class Link(
     val wordCount: Int = 0,
 ) {
     val estimatedReadMinutes: Int
-        get() = if (wordCount < 50) 0 else (wordCount / 200).coerceAtLeast(1)
+        get() {
+            val count = if (wordCount > 0) wordCount
+                        else "$description $summary".split("\\s+".toRegex()).count { it.isNotBlank() }
+            return if (count < 50) 0 else (count / 200).coerceAtLeast(1)
+        }
 }
 
 enum class LinkStatus { UNREAD, READ, ARCHIVED }
