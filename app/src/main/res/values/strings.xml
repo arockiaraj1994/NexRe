@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NexRe</string>
-    <string name="share_target_save">NexRe — Save</string>
-    <string name="share_target_summarize">NexRe — Summarize</string>
+    <string name="share_target_save">Save</string>
+    <string name="share_target_summarize">Summarize</string>
     <string name="notification_channel_save">Save Confirmation</string>
     <string name="notification_channel_reminders">Reading Reminders</string>
     <string name="saved_notification_title">Saved</string>
